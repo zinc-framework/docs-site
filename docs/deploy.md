@@ -1,26 +1,27 @@
 # Деплой Доки
 
-Дока хостится на сервере как набор статических файлов.
+The documentation is hosted on the server as a set of static files.
 
-## Когда деплоим
+## When we deploy
 
-Деплоим автоматически, при слиянии пул-реквеста в ветку `main` в репозитории `content` или `platform`.
+We deploy automatically when a pull request is merged into the `main` branch in the `content` or `platform` repositories.
 
-## Как собираем
+## How we build
 
-Проект собирается с помощью [GitHub Actions](https://docs.github.com/en/actions).
+The project is built using [GitHub Actions](https://docs.github.com/en/actions).
 
-В каждом репозитории описан свой воркфлоу для сборки, но они идентичны по содержанию:
+Each repository has its own workflow for building, but they are identical in content:
 
-- [Воркфлоу контента](https://github.com/doka-guide/content/blob/main/.github/workflows/product-deploy.yml)
-- [Воркфлоу платформы](https://github.com/doka-guide/platform/blob/main/.github/workflows/product-deploy.yml)
+- [Content workflow](https://github.com/doka-guide/content/blob/main/.github/workflows/product-deploy.yml)
+- [Platform workflow](https://github.com/doka-guide/platform/blob/main/.github/workflows/product-deploy.yml)
 
-Сборка состоит из пяти этапов:
+The build consists of five stages:
 
-1. скачать свежие версии контента и платформы;
-1. установить зависимости;
-1. подключить статьи к платформе;
-1. собрать проект;
-1. отправить папку со сборкой на сервер.
+1. Download the latest versions of the content and platform.
+2. Install dependencies.
+3. Connect articles to the platform.
+4. Build the project.
+5. Send the build folder to the server.
 
-На стороне сервера не происходит никаких действий, кроме публикации переданной папки со сборкой.
+On the server side, no actions are taken except for publishing the provided build folder.
+

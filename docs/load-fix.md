@@ -1,56 +1,55 @@
 # Если сайт Доки медленно загружается или не работает совсем
 
-## Коротко
+## Summary
 
-1. Запросите список IP-адресов серверов, на которых крутится зеркало сайта через `nslookup doka.guide`.
-2. Проверьте скорость и доступность IP-адресов из пункта 1 — `ping ip-адрес`.
-3. Откройте специальный файл с правами администратора — **c:\windows\system32\drivers\etc\hosts** или **/etc/hosts**.
-4. Добавьте самый быстрый из IP-адресов в конец файла — `ip-адрес doka.guide www.doka.guide`.
-5. Сохраните файл.
+1. Request a list of IP addresses of the servers hosting the mirror site using `nslookup doka.guide`.
+2. Check the speed and availability of the IP addresses from step 1 using `ping ip-адрес`.
+3. Open a special file with administrator privileges — **c:\windows\system32\drivers\etc\hosts** or **/etc/hosts**.
+4. Add the fastest IP address to the end of the file — `ip-адрес doka.guide www.doka.guide`.
+5. Save the file.
 
-## Подробнее
+## Details
 
-Сайт Доки работает на нескольких серверах. Это сделано, чтобы обеспечить максимальную скорость и распределить нагрузку.
+The Doka website runs on multiple servers to ensure maximum speed and distribute the load.
 
-### Запрос списка IP-адресов серверов
+### Requesting a list of server IP addresses
 
-Список всех серверов можно получить с помощью команды:
+You can obtain a list of all servers using the following command:
 
 ```bash
 nslookup doka.guide
 ```
 
-Это команда запрашивает у ближайшего DNS-сервера список IP-адресов, на которых расположен сайт. DNS-сервер выдаёт список, элементы которого при каждом запросе циклично смещаются на один шаг. На практике это означает, что браузер загружает сайт с разных серверов.
+This command requests the nearest DNS server for a list of IP addresses where the website is located. The DNS server provides a list, and with each request, the elements of the list are shifted by one step. In practice, this means that the browser loads the site from different servers.
 
-Очередной сервер может быть расположен далеко и близко к пользователю. Работу сайта можно ускорить, используя ближайший сервер. Это можно сделать, прописав у себя на компьютере «связку» между доменным именем и IP-адресом. Это поможет и в том случае, если один из IP-адресов попал в чёрный список интернет-провайдера пользователя.
+Each server can be located near or far from the user. To speed up the website, you can use the nearest server. You can achieve this by mapping the domain name to the IP address on your computer. This also helps if one of the IP addresses is blacklisted by the user's internet service provider.
 
-### Проверить скорость и доступность сервера
+### Checking the speed and availability of the server
 
-Для выбора сервера нужно проверить список IP-адресов и скорость доступа командой:
+To select a server, you need to check the list of IP addresses and their access speed using the following command:
 
 ```bash
 ping 123.123.123.123
 ```
 
-Вместо `123.123.123.123` подставляйте IP-адреса из списка. Сервер с наименьшем временем ответа, скорее всего, и будет лучшим решением. Не забывайте также время от времени проверять список IP-адресов.
+Replace `123.123.123.123` with the IP addresses from the list. The server with the lowest response time is likely the best solution. Also, remember to periodically check the list of IP addresses.
 
-### Открыть нужный файл
+### Opening the necessary file
 
-Список таких «связок» прописывается в специальном файле. Местоположение для разных операционных систем отличается:
+The list of these mappings is stored in a special file. The location differs for different operating systems:
 
 - Windows NT, 2000, XP, 2003, Vista, 7, 8, 10, 11 — **c:\windows\system32\drivers\etc\hosts**;
 - Linux, Unix, BSD — **/etc/hosts**;
-- macOS — **/private/etc/hosts** или **/etc/hosts**
+- macOS — **/private/etc/hosts** or **/etc/hosts**
 
-Для изменения необходимо открыть файл от имени администратора (или `sudo`).
+To make changes, you need to open the file with administrator privileges (or `sudo`).
 
-### Прописать связку
+### Adding the mapping
 
-Дообавьте в конец файла следующую строчку:
+Add the following line to the end of the file:
 
 ```bash
 123.123.123.123 doka.guide www.doka.guide
 ```
 
-Вместо `123.123.123.123` подставьте самый близкий из доступных серверов.
-
+Replace `123.123.123.123` with the closest available server's IP address.

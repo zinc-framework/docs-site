@@ -1,39 +1,40 @@
 # Как запустить Доку локально
 
-Для работы с платформой вам потребуется [Node.js](https://nodejs.org/en/) и npm. Мы используем стабильную LTS-версию Node.js и версию npm, которая идёт в комплекте. Если у вас установлена другая версия Node.js, вы можете использовать [nvm](https://github.com/nvm-sh/nvm) для переключения на нужную.
+To work with the platform, you will need [Node.js](https://nodejs.org/en/) and npm. We use the stable LTS version of Node.js and the version of npm that comes with it. If you have a different version of Node.js installed, you can use [nvm](https://github.com/nvm-sh/nvm) to switch to the required version.
 
-## Минимальный запуск
+## Minimum setup
 
-Чтобы запустить Доку локально, нужно:
+To run the Docs locally, you need to:
 
-1. Скачать репозиторий.
-1. Установить зависимости командой `npm i`.
-1. Сделать копию файла `.env.example` и назвать его `.env`. Задать в нём нужные переменные окружения.
-1. Запустить локальный веб-сервер командой `npm start`.
+1. Download the repository.
+2. Install dependencies using the command `npm i`.
+3. Make a copy of the `.env.example` file and name it `.env`. Set the required environment variables in it.
+4. Start the local web server using the command `npm start`.
 
-## Запуск с сервис воркером
+## Running with a service worker
 
-Чтобы запустить Доку с сервис воркером, нужно:
+To run the Docs with a service worker, you need to:
 
-1. Сделать всё описанное в предыдущем пункте.
-2. Добавить переменную `DOKA_MODE` в localStorage.
-3. Установить значение переменной `DOKA_MODE` в `DEBUG`.
+1. Follow all the steps mentioned in the previous section.
+2. Add the `DOKA_MODE` variable to localStorage.
+3. Set the value of the `DOKA_MODE` variable to `DEBUG`.
 
-## Запуск с реальным контентом
+## Running with real content
 
-1. Скачать репозитории с контентом и платформой в одну папку.
-1. Установить зависимости командой `npm i`.
-1. Сделать копию файла `.env.example` и назвать его `.env`. Задать в нём нужные переменные окружения:
-  - `BASE_URL` - базовый адрес для сайта;
-  - `SECTIONS` - список разделов сайта;
-  - `PATH_TO_CONTENT` - путь до репозитория с контентом;
-  - `CONTENT_REP_FOLDERS` - папки с содержимым разделов и служебной информацией для сборки;
-  - `DOKA_ORG` - путь до организации на GitHub;
-  - `PLATFORM_REP_GITHUB_URL` - путь до репозитория с платформой на GitHub;
-  - `CONTENT_REP_GITHUB_URL` - путь до репозитория с контентом на GitHub;
-  - `CONTENT_REP_GITHUB` - ссылка до репозитория с контентом на GitHub для работы с Git;
-  - `SERVER_PATH` - абсолютный путь до папки на сервере с текущей сборкой;
-  - `GITHUB_TOKEN` - токен для работы с GraphQL GitHub (персональный токен можно сгенерировать, как описано в [инструкции](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)).
-2. Запустить локальный веб-сервер командой `npm start`.
+1. Download the content and platform repositories into one folder.
+2. Install dependencies using the command `npm i`.
+3. Make a copy of the `.env.example` file and name it `.env`. Set the required environment variables in it:
+  - `BASE_URL` - the base address for the website;
+  - `SECTIONS` - the list of website sections;
+  - `PATH_TO_CONTENT` - the path to the content repository;
+  - `CONTENT_REP_FOLDERS` - folders with section content and build-related information;
+  - `DOKA_ORG` - the path to the organization on GitHub;
+  - `PLATFORM_REP_GITHUB_URL` - the path to the platform repository on GitHub;
+  - `CONTENT_REP_GITHUB_URL` - the path to the content repository on GitHub;
+  - `CONTENT_REP_GITHUB` - the link to the content repository on GitHub for working with Git;
+  - `SERVER_PATH` - the absolute path to the folder on the server with the current build;
+  - `GITHUB_TOKEN` - the token for working with GitHub's GraphQL (you can generate a personal token as described in the [instructions](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)).
+4. Start the local web server using the command `npm start`.
 
-Если оставить поле `GITHUB_TOKEN` пустым, на страницах участников не будет отображена информация об активности на GitHub в репозитории с контентом.
+If you leave the `GITHUB_TOKEN` field empty, the activity information on GitHub in the content repository will not be displayed on the participant pages.
+

@@ -1,239 +1,239 @@
 # Как работает Дока
+## Repositories
 
-## Репозитории
+Doka lives on GitHub and operates based on several repositories:
 
-Дока живёт на гитхабе и работает на базе нескольких репозиториев:
+- [Content](https://github.com/doka-guide/content), which contains all the materials;
+- [Platform](https://github.com/doka-guide/platform), which contains all the build code and client code of the web application;
+- [Backend](https://github.com/doka-guide/api), which contains the Doka API;
+- [Search](https://github.com/doka-guide/search), which contains the API for content search.
 
-- [Контент](https://github.com/doka-guide/content), в котором находятся все материалы;
-- [Платформа](https://github.com/doka-guide/platform), в котором находится весь код сборки и клиентский код веб-приложения;
-- [Бэкенд](https://github.com/doka-guide/api), в котором находится API Доки;
-- [Поиск](https://github.com/doka-guide/search), в котором хранится API для организации поиска по контенту.
+Authors of Doka primarily interact with the **Content** repository, which contains docs, articles, practices for all sections, as well as materials from the "Interviewing" section.
 
-Авторы Доки в основном взаимодействуют с репозиторием **Контент**, в котором хранятся доки, статьи и практики для всех разделов, а также материалы из рубрики «На собеседовании».
+**Platform** is based on the static site generator [11ty](https://www.11ty.dev). The site pages are styled as templates in the [Nunjucks](https://mozilla.github.io/nunjucks/) format.
 
-**Платформа** основана на генераторе статических сайтов [11ty](https://www.11ty.dev). Страницы сайта свёрстаны в виде шаблонов в формате [Nunjucks](https://mozilla.github.io/nunjucks/).
+**Backend** is a REST API implemented in Go. The API allows saving user-submitted forms and reactions to articles, and also serves as a platform for email newsletters.
 
-**Бэкенд** — это REST API, который реализован на языке Go. API позволяет сохранять заполненные пользователями формы и реакции на статьи, а также является платформой для организации рассылок по электронной почте.
+**Search** contains an engine that enables searching through a pre-built inverted index. The index is generated during site deployment from the main branch.
 
-**Поиск** содержит движок, который позволяет искать по заранее подготовленному инвертированному индексу. Индекс формируется во время развёртывания сайта из основной ветки.
+The Content and Platform repositories are used for building the static site, while Backend and Search contribute to the site's interactivity.
 
-Репозитории Контент и Платформа используются для сборки статического сайта, Бэкенд и Поиск — для интерактивности сайта.
+All repositories are open, and we always welcome new contributors. The workflow in the repositories follows the GitHub Flow: there is a main branch that holds the current version of the product, and other branches with changes that undergo review in pull requests.
 
-Все репозитории открытые, мы всегда ждём новых контрибьюторов. Работа в репозиториях организована по схеме GitHub Flow: есть основная ветка `main`, в которой хранится текущая версия продукта, и другие ветки с изменениями, которые проходят ревью в пулреквестах.
+## Platform
 
-## Платформа
+To build the site, it is necessary to connect the Content. This is an independent repository that "knows nothing" about the Platform. The Platform, however, "knows" some things about the Content: paths, section list and colors, material settings, and the structure of material folders.
 
-Для сборки сайта нужно подключать Контент. Это независимый репозиторий, который ничего «не знает» о Платформе. Платформа «знает» кое-что о Контенте: пути, список и цвета разделов, настройки материалов и структуру папок материалов.
+Separating content and platform into different repositories is an unconventional approach for working with an 11ty project. With this approach, we lose some of the standard engine functionality (e.g., automatic date updates based on git history). However, it allows us to:
 
-Разделение контента и платформы на разные репозитории — это нестандартный способ работы с проектом на 11ty. При таком подходе мы лишаемся части стандартного функционала движка (например, автоматического обновления дат на основе истории git), но это позволяет:
+- work with Doka materials directly without using a build process (assuming that all standard Markdown syntax is correctly processed on the platform side);
+- develop the platform independently from the materials (e.g., no need to wait for the entire content to be built on each iteration, just working with typical materials is sufficient);
+- create less noise for developers and authors in their respective repositories;
+- conduct independent build testing;
+- always get the latest version of content and its representation during builds in both content and platform;
+- eliminate the need for authors to maintain the necessary development environment (the result can be previewed in the generated preview with each push to GitHub in a pull request).
 
-- работать с материалами Доки напрямую без использования сборки (подразумевая, что весь стандартный синтаксис Markdown обрабатывается корректно на стороне платформы);
-- развивать платформу независимо от материалов (например, не нужно ждать на каждой итерации сборки всего контента, достаточно работать с типовым материалом);
-- создавать меньше шума для разработчиков и авторов в соответствующих репозитория;
-- проводить тестирование сборки независимо;
-- при сборках в контенте и платформе получать всегда актуальную версию контента и способа его представления;
-- убирает необходимость поддержки необходимого окружения разработчика для авторов (то, как получилось можно посмотреть в превью, которое генерируется при каждом пуше на GitHub в пулреквесте).
+### Constants and Default Behavior
 
-### Константы и поведение по умолчанию
+**List of environment variables**:
 
-**Список переменных окружения**:
+- `BASE_URL` — base URL for the website;
+- `SECTIONS` — list of main sections of the website;
+- `PATH_TO_CONTENT` — path to the content repository;
+- `CONTENT_REP_FOLDERS` — folders containing section content and build-related information;
+- `DOKA_ORG` — path to the organization on GitHub;
+- `PLATFORM_REP_GITHUB_URL` — path to the platform repository on GitHub;
+- `CONTENT_REP_GITHUB_URL` — path to the content repository on GitHub;
+- `CONTENT_REP_GITHUB` — link to the content repository on GitHub for Git operations;
+- `SERVER_PATH` — absolute path to the folder on the server with the current build;
+- `GITHUB_TOKEN` — token for working with the GitHub GraphQL API. [Instructions for generating a personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
 
-- `BASE_URL` — базовый адрес для сайта;
-- `SECTIONS` — список основных разделов сайта;
-- `PATH_TO_CONTENT` — путь до репозитория с контентом;
-- `CONTENT_REP_FOLDERS` — папки с содержимым разделов и служебной информацией для сборки;
-- `DOKA_ORG` — путь до организации на GitHub;
-- `PLATFORM_REP_GITHUB_URL` — путь до репозитория с платформой на GitHub;
-- `CONTENT_REP_GITHUB_URL` — путь до репозитория с контентом на GitHub;
-- `CONTENT_REP_GITHUB` — ссылка до репозитория с контентом на GitHub для работы с Git;
-- `SERVER_PATH` — абсолютный путь до папки на сервере с текущей сборкой;
-- `GITHUB_TOKEN` — токен для работы с GraphQL API GitHub. [Инструкция по генерации персонального токена](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
+The `settings` folder from the `CONTENT_REP_FOLDERS` list is mandatory for the build. If the `GITHUB_TOKEN` field is left empty, the activity information of contributors on GitHub will not be displayed on the content repository pages.
 
-Папка _settings_ из списка `CONTENT_REP_FOLDERS` является обязательной для сборки. Если оставить поле `GITHUB_TOKEN` пустым, на страницах участников не будет отображаться информация об их активности на GitHub в репозитории с контентом.
-
-Список разделов Доки, которые попадают в сборку сайта, задаётся переменной `SECTIONS` в файлах [_.env.example_](https://github.com/doka-guide/platform/blob/main/.env.example), где задаются переменные окружения (подробнее об обязательной настройке перед запуском [в документации](https://github.com/doka-guide/platform/blob/main/docs/how-to-run.md)), и [_constants.js_](https://github.com/doka-guide/platform/blob/main/config/constants.js), в котором указываются значения по умолчанию, если они не заданы в файле с переменными окружения. Папки с материалами разделов могут быть пустыми или вообще отсутствовать. Сборка будет учитывать только те материалы, которые есть в указанных папках. Структура папок с материалами должна быть следующей:
+The list of Doka sections included in the website build is defined by the `SECTIONS` variable in the [_.env.example_](https://github.com/doka-guide/platform/blob/main/.env.example) files, where environment variables are set (more details on the required configuration before running can be found in the [documentation](https://github.com/doka-guide/platform/blob/main/docs/how-to-run.md)), and in [_constants.js_](https://github.com/doka-guide/platform/blob/main/config/constants.js), where default values are specified if they are not set in the environment variable file. Section material folders can be empty or even absent. The build will only consider the materials present in the specified folders. The folder structure for the section materials should be as follows:
 
 ```bash
-section                         # Папка раздела
-  └── doka-or-article           # Папка для материала
-      ├── demos                 # Папка для демок
-      │    └── first-demo       # Папка демки
-      │         └── index.html  # Страница с демкой (загружается в <iframe>)
-      ├── images                # Папка для картинок
-      │    └── picture.png      # Файлы картинок
-      ├── practice              # Папка для рубрики «На практике»
-      │    └── author.md        # Текст для раздела «На практике» от конкретного автора
-      └── index.md              # Текст материала (дока / статья)
+section                         # Section folder
+    └── doka-or-article           # Folder for the material
+            ├── demos                 # Folder for demos
+            │    └── first-demo       # Demo folder
+            │         └── index.html  # Demo page (loaded in <iframe>)
+            ├── images                # Folder for images
+            │    └── picture.png      # Image files
+            ├── practice              # Folder for the "On Practice" section
+            │    └── author.md        # Text for the "On Practice" section from a specific author
+            └── index.md              # Material text (guide / article)
 ```
 
-Цвета разделов определяются в файлах:
+The section colors are defined in the following files:
 - [_category-colors.js_](https://github.com/doka-guide/platform/blob/main/config/category-colors.js);
-- [_base-colors.css_](https://github.com/doka-guide/platform/blob/main/src/styles/base-colors.css) — базовые цвета;
-- [_light-theme.css_](https://github.com/doka-guide/platform/blob/main/src/styles/light-theme.css) — для светлой темы;
-- [_dark-theme.css_](https://github.com/doka-guide/platform/blob/main/src/styles/dark-theme.css) — для тёмной темы.
+- [_base-colors.css_](https://github.com/doka-guide/platform/blob/main/src/styles/base-colors.css) - base colors;
+- [_light-theme.css_](https://github.com/doka-guide/platform/blob/main/src/styles/light-theme.css) - for the light theme;
+- [_dark-theme.css_](https://github.com/doka-guide/platform/blob/main/src/styles/dark-theme.css) - for the dark theme.
 
-#### Пути
+#### Paths
 
-Сайт формируется из двух репозиториев для Платформы, поэтому нужно подготовить набор путей с материалами Контента перед сборкой. Для этого выполняется скрипт [_make-links.js_](https://github.com/doka-guide/platform/blob/main/make-links.js) в одном из двух режимов: локально для пользователей — в интерактивном, на сервере — в режиме развёртывания. По умолчанию папки из Контента встраиваются с помощью ссылок в папку _src/_.
+The website is built from two repositories for the Platform, so it is necessary to prepare a set of paths with the Content materials before the build. This is done by running the script [_make-links.js_](https://github.com/doka-guide/platform/blob/main/make-links.js) in one of two modes: locally for users - in interactive mode, on the server - in deployment mode. By default, the Content folders are linked into the _src/_ folder.
 
-Структура папок Платформы:
+Platform folder structure:
 
 ```bash
 platform
-  ├── .github         # Служебная папка для GitHub
-  ├── config          # Папка с файлами конфигурации
-  ├── docs            # Документация Платформы Доки
-  └── src             # Исходный код для сборки
-      ├── data        # Папка с подключением данных (сущность 11ty)
-      ├── fonts       # Папка с подготовленными шрифтами
-      ├── images      # Папка с иконками и неконтентными картинками сайта
-      ├── includes    # Папка с шаблонами некоторых блоков
-      ├── layouts     # Папка с основой разметки страниц
-      ├── libs        # Папка с библиотеками для сборки
-      ├── scripts     # Папка со скриптами для сборки и клиента
-      ├── styles      # Стили сайта
-      ├── transforms  # Трансформации (сущность 11ty)
-      └── views       # Представления основных страниц сайта
+    ├── .github         # GitHub service folder
+    ├── config          # Configuration files folder
+    ├── docs            # Doka Platform documentation
+    └── src             # Source code for the build
+        ├── data        # Folder for data connection (11ty entity)
+        ├── fonts       # Folder for prepared fonts
+        ├── images      # Folder for icons and non-content images of the site
+        ├── includes    # Folder for templates of some blocks
+        ├── layouts     # Folder for main page layouts
+        ├── libs        # Folder for build libraries
+        ├── scripts     # Folder for build and client scripts
+        ├── styles      # Site styles
+        ├── transforms  # Transforms (11ty entity)
+        └── views       # Views of main site pages
 ```
 
-#### Сборка сайта
+#### Site Build
 
-_.eleventy.js_ — основной файл для сборки. В нём прописана конфигурация движка 11ty.
+_.eleventy.js_ is the main file for the build. It contains the configuration for the 11ty engine.
 
-Сущности 11ty:
+11ty entities:
 
-- контент — тексты на сайте (в Доке файлы с контентом хранятся в подпапках папки _src_ с расширениями _*.md_ и _*.html_) и различные медиафайлы;
-- шаблоны — основной способ для формирования разметки (в Доке это файлы с разметкой страниц или блоков страниц с расширениями _*.njk_);
-- данные — заранее записанные или специально подготовленные с помощью JavaScript данные, которые нужны для сборки (в Доке это файлы с расширениями _*.11tydata.js_);
-- коллекции — специальный объект движка, в котором могут хранится специально подготовленные данные (в Доке коллекции задаются в основном файле конфигурации);
-- трансформации — процесс обработки уже готовых страниц сайта;
-- пермалинки — постоянные адреса для страниц, которые отличаются от установленных 11ty и указываются пользователем вручную. Они используются для обеспечения гибкости движка по отношению к пути хранения файла с контентом.
+- Content: Texts on the site (in Doka, content files are stored in subfolders of the _src_ folder with extensions _*.md_ and _*.html_) and various media files.
+- Templates: The main way to generate markup (in Doka, these are files with page or block markup with extensions _*.njk_).
+- Data: Predefined or specially prepared JavaScript data needed for the build (in Doka, these are files with extensions _*.11tydata.js_).
+- Collections: A special object in the engine that can store specially prepared data (in Doka, collections are defined in the main configuration file).
+- Transformations: The process of processing finished site pages.
+- Permalinks: Permanent addresses for pages that differ from the paths set by 11ty and are manually specified by the user. They are used to provide flexibility to the engine in terms of content file storage path.
 
-Сборка сайта осуществляется в следующем порядке:
+The site build process follows these steps:
 
-1. Поиск файлов с вёрсткой (шаблонов) и контентом в репозитории по указанным путям.
-2. Проход по всем найденным файлам:
-    - Формирование списка всех файлов, которые не являются файлами с контентом (в Доке это шрифты, стили, клиентские скрипты, иконки, фото, видео и пр.).
-    - Предварительная обработка шаблонов и подготовка контента для шаблонов.
-3. Асинхронное копирование всех файлов, которые не являются файлами с контентом. Копирование проходит параллельно предварительным стадиям.
-4. Формирование данных и вычисляемых значений для сборки (для заполнения готовых шаблонов контентом).
-5. Построение графа зависимостей в следующем порядке:
-    - обработка шаблонов, которые не содержат зависимостей;
-    - обработка шаблонов, которые используют теги (встроенное поле в мете файлов с контентом);
-    - обработка шаблонов, которые используют пагинацию и любые другие коллекции;
-    - обработка шаблонов, которые используют пагинацию и Configuration API для добавления коллекций;
-    - обработка шаблонов, которые используют пагинацию и готовят локальные объекты с коллекциями `collection`;
-    - обработка шаблонов, которые используют пагинацию и готовят глобальный объект с коллекциями `collection.all`.
-6. Формирование коллекций в правильном порядке для графа зависимостей.
-7. Формирование дополнительного графа зависимостей для формирования вычисляемых данных, пермалинков и путей исходных файлов с контентом.
-8. Обработка шаблонов без формирования разметки страниц.
-9. Проверка на дубликаты.
-10. Обработка шаблонов с окончательной разметкой страниц.
-11. Применение трансформаций.
+1. Searching for template and content files in the repository based on the specified paths.
+2. Iterating through all found files:
+    - Creating a list of all non-content files (in Doka, these include fonts, styles, client scripts, icons, photos, videos, etc.).
+    - Preprocessing templates and preparing content for templates.
+3. Asynchronously copying all non-content files. The copying process runs in parallel with the preprocessing stages.
+4. Generating data and computed values for the build (to populate ready-made templates with content).
+5. Building the dependency graph in the following order:
+    - Processing templates that do not have dependencies.
+    - Processing templates that use tags (an embedded field in content files).
+    - Processing templates that use pagination and any other collections.
+    - Processing templates that use pagination and the Configuration API to add collections.
+    - Processing templates that use pagination and prepare local collection objects (`collection`).
+    - Processing templates that use pagination and prepare the global collection object (`collection.all`).
+6. Generating collections in the correct order for the dependency graph.
+7. Building an additional dependency graph for generating computed data, permalinks, and paths to source content files.
+8. Processing templates without generating page markup.
+9. Checking for duplicates.
+10. Processing templates with final page markup.
+11. Applying transformations.
 
-В файле конфигурации настраиваются папки, в которых хранятся разные типы сущностей. В Доке папки используются следующим образом:
+The configuration file is used to set up the folders where different types of entities are stored. In Doka, the folders are used as follows:
 
-- _dist/_ — для собранного сайта;
-- _src/_ — для исходного кода сайта;
-- _src/data/_ — для глобальных данных сайта;
-- _src/includes/_ — для разметки блоков страниц;
-- _src/layouts/_ — для основной разметки страниц.
+- _dist/_: For the built site.
+- _src/_: For the source code of the site.
+- _src/data/_: For global site data.
+- _src/includes/_: For markup of page blocks.
+- _src/layouts/_: For the main page markup.
 
-В качестве основной библиотеки для обработки файлов с контентом используется библиотека `markdown-it`. Однако, по умолчанию библиотека обрабатывает видео не так, как это нужно в Доке. Поэтому используется [собственное решение](https://github.com/doka-guide/platform/blob/main/src/markdown-it.js).
+As the main library for processing content files, the `markdown-it` library is used. However, by default, the library does not handle videos as needed in Doka. Therefore, a [custom solution](https://github.com/doka-guide/platform/blob/main/src/markdown-it.js) is used.
 
-Особое внимание при сборке сайта Доки уделяется трансформациям, то есть постобработке готовой разметки страниц. Используются следующие трансформации:
+Special attention is given to transformations during the Doka site build, which is the post-processing of the generated page markup. The following transformations are used:
 
-1. `answers-link-transform` — правит пути к демкам и картинкам, которые вставлены в раздел «На практике».
-1. `article-code-blocks-transform` — формирует разметку для блоков с кодом в тексте материалов с возможностью копирования.
-1. `article-inline-code-transform` — формирует разметку для кода в тексте материалов с возможностью копирования.
-1. `callout-transform` — формирует разметку для коллаутов.
-1. `code-breakify-transform` — расставляет переносы в тексте для кода.
-1. `code-classes-transform` — расставляет классы на инлайновые блоки с кодом.
-1. `color-picker-transform` — добавляет квадратики с цветом в коде после упоминания.
-1. `demo-external-link-transform` — добавляет ссылки для открытия демок в новом окне.
-1. `demo-link-transform` — правит пути к демкам и картинкам, которые вставлены в раздел «На практике».
-1. `details-transform` — оборачивает содержимое `<details>` в блоки с классом `.content`.
-1. `headings-anchor-transform` — генерирует якорные ссылки на заголовки.
-1. `headings-id-transform` — генерирует разметку для формирования атрибутов `id` заголовков.
-1. `iframe-attr-transform` — добавляет атрибуты к `<iframe>`, если их нет.
-1. `image-place-transform` — помещает изображения с подписями внутрь `<figure>`.
-1. `image-transform` — готовит картинки в разных форматах для оптимизации загрузки страниц.
-1. `link-transform` — добавляет классы к ссылкам.
-1. `table-transform` — оборачивает таблицы в контейнеры с прокруткой.
-1. `toc-transform` — генерирует оглавление страницы.
+1. `answers-link-transform` - adjusts paths to demos and images embedded in the "On Practice" section.
+2. `article-code-blocks-transform` - generates markup for code blocks in the text of materials with copy functionality.
+3. `article-inline-code-transform` - generates markup for inline code in the text of materials with copy functionality.
+4. `callout-transform` - generates markup for callouts.
+5. `code-breakify-transform` - adds line breaks in code text.
+6. `code-classes-transform` - adds classes to inline code blocks.
+7. `color-picker-transform` - adds color squares in code after color mentions.
+8. `demo-external-link-transform` - adds links to open demos in a new window.
+9. `demo-link-transform` - adjusts paths to demos and images embedded in the "On Practice" section.
+10. `details-transform` - wraps content inside `<details>` tags with a `.content` class.
+11. `headings-anchor-transform` - generates anchor links for headings.
+12. `headings-id-transform` - generates markup to create `id` attributes for headings.
+13. `iframe-attr-transform` - adds attributes to `<iframe>` tags if they are missing.
+14. `image-place-transform` - places images with captions inside `<figure>` tags.
+15. `image-transform` - prepares images in different formats for optimized page loading.
+16. `link-transform` - adds classes to links.
+17. `table-transform` - wraps tables in containers with scrolling.
+18. `toc-transform` - generates a table of contents for the page.
 
-#### Тесты
+#### Tests
 
-В Доке используем модульное тестирование с помощью фреймворка [Jest](https://jestjs.io). Его конфигурация находится в файлах [_jest.config.js_](https://github.com/doka-guide/platform/blob/main/jest.config.js) и [_jest.setup.js_](https://github.com/doka-guide/platform/blob/main/jest.setup.js). Сами тесты — в подпапке *__tests__/* папок со скриптами.
+In Doka, we use unit testing with the [Jest](https://jestjs.io) framework. Its configuration can be found in the files [_jest.config.js_](https://github.com/doka-guide/platform/blob/main/jest.config.js) and [_jest.setup.js_](https://github.com/doka-guide/platform/blob/main/jest.setup.js). The tests themselves are located in the subfolders of the scripts folder under the *__tests__/* directory.
 
-#### Скрипты запуска
+#### Launch Scripts
 
-Для работы платформы можно использовать разные режимы (описаны в файле [_package.json_](https://github.com/doka-guide/platform/blob/main/package.json)):
+Different modes can be used to work with the platform (described in the [_package.json_](https://github.com/doka-guide/platform/blob/main/package.json) file):
 
-- `debug` — для отладки платформы и контента (сайт не падает, если что-то пошло не так, а информирует о том, что случилось);
-- `start` — для запуска платформы локально с автоматической перезагрузкой при изменении файлов контента или платформы;
-- `build` — для сборки сайта (с минификацей кода и всеми трансформациями);
-- `preview` — для предварительного просмотра сборки (без минификации кода и всеми трансформациями кроме `image-transform`);
-- `deploy` — для развёртывания сайта на инфраструктуре Доки (при наличии доступа);
-- `editorconfig` — для проверки файлов на требования Editorconfig, согласно [конфигурации](https://github.com/doka-guide/platform/blob/main/.editorconfig);
-- `stylelint` — для проверки файлов на требования Stylelint, согласно [конфигурации](https://github.com/doka-guide/platform/blob/main/.stylelintrc.json);
-- `eslint` — для проверки файлов на требования ESLint, согласно [конфигурации](https://github.com/doka-guide/platform/blob/main/.eslintrc.json);
-- `lint-check` — запуск всех линтеров;
-- `test` — запуск модульных тестов;
-- `make-links` — для формирования символьных ссылок на контент.
+- `debug` - for debugging the platform and content (the site doesn't crash if something goes wrong, but informs about what happened);
+- `start` - for running the platform locally with automatic reloading when content or platform files change;
+- `build` - for building the website (with code minification and all transformations);
+- `preview` - for previewing the build (without code minification and all transformations except `image-transform`);
+- `deploy` - for deploying the site on the Doka infrastructure (if access is available);
+- `editorconfig` - for checking files against the Editorconfig requirements, according to the [configuration](https://github.com/doka-guide/platform/blob/main/.editorconfig);
+- `stylelint` - for checking files against the Stylelint requirements, according to the [configuration](https://github.com/doka-guide/platform/blob/main/.stylelintrc.json);
+- `eslint` - for checking files against the ESLint requirements, according to the [configuration](https://github.com/doka-guide/platform/blob/main/.eslintrc.json);
+- `lint-check` - runs all linters;
+- `test` - runs unit tests;
+- `make-links` - for creating symbolic links to content.
 
-#### Шаблоны
+#### Templates
 
-Шаблоны в Доке реализованы с помощью [Nunjucks](https://mozilla.github.io/nunjucks/). В папке _src/layouts_ содержится один базовый шаблон _base.njk_ с основной разметкой любой страницы на сайте. В нём формируются основные теги `<html>`, `<head>` и `<body>`, подключается микроразметка и метатеги с помощью _meta.njk_, к странице подключаются стили и скрипты клиентского кода.
+Templates in Doka are implemented using [Nunjucks](https://mozilla.github.io/nunjucks/). The _src/layouts_ folder contains a base template _base.njk_ with the main layout of any page on the site. It includes the main `<html>`, `<head>`, and `<body>` tags, microdata, and meta tags using _meta.njk_, and it also includes styles and client-side scripts.
 
-Шаблоны страниц сайта находятся в папке _src/views_:
+The templates for the site pages are located in the _src/views_ folder:
 
-- _[404.njk](https://github.com/doka-guide/platform/blob/main/src/views/404.njk)_ — страница, которая показывается, если по указанному адресу страницы нет;
-- _[all.njk](https://github.com/doka-guide/platform/blob/main/src/views/all.njk)_ — страница с индексом по всем материалам (докам, статьям);
-- _[article-index.njk](https://github.com/doka-guide/platform/blob/main/src/views/article-index.njk)_ — страницы с индексом материалов по каждому разделу;
-- _[doc.njk](https://github.com/doka-guide/platform/blob/main/src/views/doc.njk)_ — страницы с материалами;
-- _[feed.njk](https://github.com/doka-guide/platform/blob/main/src/views/feed.njk)_ — XML-документ для организации фида для RSS;
-- _[index.njk](https://github.com/doka-guide/platform/blob/main/src/views/index.njk)_ — главная страница сайта;
-- _[page.njk](https://github.com/doka-guide/platform/blob/main/src/views/page.njk)_ — страницы с текстами, которые не являются материалами;
-- _[people.njk](https://github.com/doka-guide/platform/blob/main/src/views/people.njk)_ — страница со списком участников (контрибьюторов);
-- _[person-json.njk](https://github.com/doka-guide/platform/blob/main/src/views/person-json.njk)_ — информация об участнике проекта в формате JSON;
-- _[person.njk](https://github.com/doka-guide/platform/blob/main/src/views/person.njk)_ — персональные страницы участников;
-- _[sc-index.njk](https://github.com/doka-guide/platform/blob/main/src/views/sc-index.njk)_ — карточки для социальных сетей (нужны для формирования картинки для социальных сетей) в формате HTML для разделов;
-- _[sc.njk](https://github.com/doka-guide/platform/blob/main/src/views/sc.njk)_ — карточки для социальных сетей (нужны для формирования картинки для социальных сетей) в формате HTML для материалов;
-- _[search.njk](https://github.com/doka-guide/platform/blob/main/src/views/search.njk)_ — страница поиска;
-- _[sitemap.njk](https://github.com/doka-guide/platform/blob/main/src/views/sitemap.njk)_ — XML-документ с картой сайта;
-- _[specials.njk](https://github.com/doka-guide/platform/blob/main/src/views/specials.njk)_ — страницы специальных проектов;
-- _[subscribe.njk](https://github.com/doka-guide/platform/blob/main/src/views/subscribe.njk)_ — страница для управления подпиской на рассылку по электронной почте.
+- _[404.njk](https://github.com/doka-guide/platform/blob/main/src/views/404.njk)_ - the page shown when a requested page doesn't exist;
+- _[all.njk](https://github.com/doka-guide/platform/blob/main/src/views/all.njk)_ - the index page for all materials (docs, articles);
+- _[article-index.njk](https://github.com/doka-guide/platform/blob/main/src/views/article-index.njk)_ - index pages for materials in each section;
+- _[doc.njk](https://github.com/doka-guide/platform/blob/main/src/views/doc.njk)_ - pages with materials;
+- _[feed.njk](https://github.com/doka-guide/platform/blob/main/src/views/feed.njk)_ - XML document for organizing an RSS feed;
+- _[index.njk](https://github.com/doka-guide/platform/blob/main/src/views/index.njk)_ - the main page of the site;
+- _[page.njk](https://github.com/doka-guide/platform/blob/main/src/views/page.njk)_ - pages with text that are not materials;
+- _[people.njk](https://github.com/doka-guide/platform/blob/main/src/views/people.njk)_ - page with a list of participants (contributors);
+- _[person-json.njk](https://github.com/doka-guide/platform/blob/main/src/views/person-json.njk)_ - information about a project participant in JSON format;
+- _[person.njk](https://github.com/doka-guide/platform/blob/main/src/views/person.njk)_ - personal pages of participants;
+- _[sc-index.njk](https://github.com/doka-guide/platform/blob/main/src/views/sc-index.njk)_ - cards for social networks (used to generate images for social networks) in HTML format for sections;
+- _[sc.njk](https://github.com/doka-guide/platform/blob/main/src/views/sc.njk)_ - cards for social networks (used to generate images for social networks) in HTML format for materials;
+- _[search.njk](https://github.com/doka-guide/platform/blob/main/src/views/search.njk)_ - search page;
+- _[sitemap.njk](https://github.com/doka-guide/platform/blob/main/src/views/sitemap.njk)_ - XML document with the site map;
+- _[specials.njk](https://github.com/doka-guide/platform/blob/main/src/views/specials.njk)_ - pages for special projects;
+- _[subscribe.njk](https://github.com/doka-guide/platform/blob/main/src/views/subscribe.njk)_ - page for managing email subscriptions.
 
-Шаблоны отдельных блоков страниц находятся в папке _src/includes_:
+The templates for individual page blocks are located in the _src/includes_ folder:
 
-- _[analytics/google.njk](https://github.com/doka-guide/platform/blob/main/src/includes/analytics/google.njk)_ — подключение Google Analytics на сайт;
-- _[analytics/metrika.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/article-image.njk)_ — подключение Яндекс.Метрики на сайт;
-- _[blocks/article-image.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/article-image.njk)_ — иллюстрации материалов;
-- ~~_[blocks/aside.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/aside.njk)_ — вёрстка страниц с боковой навигацией (пока не используется)~~;
-- _[blocks/cookie-notification.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/cookie-notification.njk)_ — попап с информацией об использовании кук;
-- _[blocks/featured-article.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/featured-article.njk)_ — блок показа одного материала для фичеринга на главной странице сайта;
-- _[blocks/footer.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/footer.njk)_ — футер сайта (переключатель темы, вторичное меню);
-- _[blocks/header.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/header.njk)_ — шапка сайта (лого, хлебные крошки, поиск, основное меню);
-- _[blocks/linked-article.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/linked-article.njk)_ — кнопки для перехода на предыдущий или следующий материал раздела;
-- _[blocks/logo.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/logo.njk)_ — вёрстка для логотипа;
-- _[blocks/nav-list.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/nav-list.njk)_ — меню со списком разделов сайта;
-- _[blocks/person-avatar.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/person-avatar.njk)_ — аватар участника;
-- _[blocks/person-badges.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/person-badges.njk)_ — набор значков участника;
-- _[blocks/person.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/person.njk)_ — представление краткой информации об участнике на странице со списком участников;
-- _[blocks/search-category.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/search-category.njk)_ — фильтр по категориям для страницы поиска;
-- _[blocks/search-hits.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/search-hits.njk)_ — один результат поиска с краткой информацией о материале;
-- _[blocks/search-tags.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/search-tags.njk)_ — фильтр по типу материала для страницы поиска;
-- _[blocks/search.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/search.njk)_ — блок поиска в основном меню;
-- _[blocks/snow-toggle.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/snow-toggle.njk)_ — переключатель для падающего снега (запускается в новогодние праздники);
-- _[blocks/snow.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/snow.njk)_ — блок, реализующий падающий снег (запускается в новогодние праздники);
-- _[blocks/social-card.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/social-card.njk)_ — карточка для социальных сетей;
-- _[blocks/theme-toggle.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/theme-toggle.njk)_ — переключатель темы на сайте;
-- _[articles-gallery.njk](https://github.com/doka-guide/platform/blob/main/src/includes/articles-gallery.njk)_ — блок со всеми материалами на главной странице, которые были выбраны для фичеринга (список материалов обновляется каждую неделю);
-- _[contributors.njk](https://github.com/doka-guide/platform/blob/main/src/includes/contributors.njk)_ — блок для материалов, в котором показаны все участники;
-- _[feedback-form.njk](https://github.com/doka-guide/platform/blob/main/src/includes/feedback-form.njk)_ — форма для отправки обратной связи для материалов;
-- _[meta.njk](https://github.com/doka-guide/platform/blob/main/src/includes/meta.njk)_ — подключение иконок, манифеста, шрифтов и стилей, настройки доступных тем, формирование метатегов и микроразметки страниц;
-- _[practices.njk](https://github.com/doka-guide/platform/blob/main/src/includes/practices.njk)_ — блок рубрики «На практике» в материалах;
-- _[questions.njk](https://github.com/doka-guide/platform/blob/main/src/includes/questions.njk)_ — блок рубрики «На собеседовании» в материалах;
-- _[related-articles-gallery.njk](https://github.com/doka-guide/platform/blob/main/src/includes/related-articles-gallery.njk)_ — блок для представления связанных док и статей с текущим материалом;
-- _[subscribe-popup.njk](https://github.com/doka-guide/platform/blob/main/src/includes/subscribe-popup.njk)_ — попап для отправки электронной почты, чтобы подписаться на рассылку.
+- _[analytics/google.njk](https://github.com/doka-guide/platform/blob/main/src/includes/analytics/google.njk)_ - Google Analytics integration on the site;
+- _[analytics/metrika.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/article-image.njk)_ - Yandex.Metrica integration on the site;
+- _[blocks/article-image.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/article-image.njk)_ - illustrations for materials;
+- ~~_[blocks/aside.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/aside.njk)_ - layout for pages with sidebar navigation (currently not used)~~;
+- _[blocks/cookie-notification.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/cookie-notification.njk)_ - popup with information about cookie usage;
+- _[blocks/featured-article.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/featured-article.njk)_ - block for displaying a single material as a featured item on the main page of the site;
+- _[blocks/footer.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/footer.njk)_ - site footer (theme switcher, secondary menu);
+- _[blocks/header.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/header.njk)_ - site header (logo, breadcrumbs, search, main menu);
+- _[blocks/linked-article.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/linked-article.njk)_ - buttons for navigating to the previous or next material in a section;
+- _[blocks/logo.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/logo.njk)_ - layout for the logo;
+- _[blocks/nav-list.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/nav-list.njk)_ - menu with a list of site sections;
+- _[blocks/person-avatar.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/person-avatar.njk)_ - participant avatar;
+- _[blocks/person-badges.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/person-badges.njk)_ - set of participant badges;
+- _[blocks/person.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/person.njk)_ - representation of brief information about a participant on the page with the list of participants;
+- _[blocks/search-category.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/search-category.njk)_ - category filter for the search page;
+- _[blocks/search-hits.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/search-hits.njk)_ - a single search result with brief information about the material;
+- _[blocks/search-tags.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/search-tags.njk)_ - material type filter for the search page;
+- _[blocks/search.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/search.njk)_ - search block in the main menu;
+- _[blocks/snow-toggle.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/snow-toggle.njk)_ - toggle for snowfall effect (activated during the New Year holidays);
+- _[blocks/snow.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/snow.njk)_ - block that implements the snowfall effect (activated during the New Year holidays);
+- _[blocks/social-card.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/social-card.njk)_ - card for social networks;
+- _[blocks/theme-toggle.njk](https://github.com/doka-guide/platform/blob/main/src/includes/blocks/theme-toggle.njk)_ - theme switcher on the site;
+- _[articles-gallery.njk](https://github.com/doka-guide/platform/blob/main/src/includes/articles-gallery.njk)_ - block with all materials on the main page that were selected for featuring (the list of materials is updated weekly);
+- _[contributors.njk](https://github.com/doka-guide/platform/blob/main/src/includes/contributors.njk)_ - block for materials that shows all contributors;
+- _[feedback-form.njk](https://github.com/doka-guide/platform/blob/main/src/includes/feedback-form.njk)_ - form for submitting feedback for materials;
+- _[meta.njk](https://github.com/doka-guide/platform/blob/main/src/includes/meta.njk)_ - includes icons, manifest, fonts, and styles, sets available themes, generates meta tags and microdata for pages;
+- _[practices.njk](https://github.com/doka-guide/platform/blob/main/src/includes/practices.njk)_ - block for the "Practical" section in materials;
+- _[questions.njk](https://github.com/doka-guide/platform/blob/main/src/includes/questions.njk)_ - block for the "Interview" section in materials;
+- _[related-articles-gallery.njk](https://github.com/doka-guide/platform/blob/main/src/includes/related-articles-gallery.njk)_ - block for presenting related docs and articles with the current material;
+- _[subscribe-popup.njk](https://github.com/doka-guide/platform/blob/main/src/includes/subscribe-popup.njk)_ - popup for submitting an email to subscribe to the newsletter.
+

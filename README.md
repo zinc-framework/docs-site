@@ -1,55 +1,54 @@
 # Платформа Доки
 
-[![Статус линтера](https://github.com/doka-guide/platform/actions/workflows/linting.yml/badge.svg?branch=main&event=push)](https://github.com/doka-guide/platform/actions/workflows/linting.yml)
+[![Linter Status](https://github.com/doka-guide/platform/actions/workflows/linting.yml/badge.svg?branch=main&event=push)](https://github.com/doka-guide/platform/actions/workflows/linting.yml)
 [![W3C Validator](https://github.com/doka-guide/platform/actions/workflows/w3c-validator.yml/badge.svg?branch=main&event=push)](https://github.com/doka-guide/platform/actions/workflows/w3c-validator.yml)
-[![Статус деплоя](https://github.com/doka-guide/platform/actions/workflows/product-deploy.yml/badge.svg?branch=main&event=push)](https://github.com/doka-guide/platform/actions/workflows/product-deploy.yml)
-[![Статус Docker](https://github.com/doka-guide/platform/actions/workflows/docker-deploy.yml/badge.svg?branch=main&event=push)](https://github.com/doka-guide/platform/actions/workflows/docker-deploy.yml)
+[![Deployment Status](https://github.com/doka-guide/platform/actions/workflows/product-deploy.yml/badge.svg?branch=main&event=push)](https://github.com/doka-guide/platform/actions/workflows/product-deploy.yml)
+[![Docker Status](https://github.com/doka-guide/platform/actions/workflows/docker-deploy.yml/badge.svg?branch=main&event=push)](https://github.com/doka-guide/platform/actions/workflows/docker-deploy.yml)
 
+[⚠️ If the Doka website loads slowly or doesn't work at all](docs/load-fix.md)
 
+Doka is a friendly encyclopedia for web developers. Our goal is to make web development documentation practical, understandable, and not boring.
 
-[⚠️ Если сайт Доки медленно загружается или не работает совсем](docs/load-fix.md)
+Join our [Telegram community](https://t.me/doka_guide) to stay up to date with the latest news, or join the [chat](https://t.me/+qYFPI2mExuQxZTFi) to chat, ask questions, and have a good time.
 
-Дока — это добрая энциклопедия для веб-разработчиков. Наша цель — сделать документацию по веб-разработке практичной, понятной и не унылой.
+This repository contains the platform for the "Doka" website. The platform collects articles from a [separate repository](https://github.com/doka-guide/content).
 
-Присоединяйтесь к [нашему сообществу в Телеграм](https://t.me/doka_guide), чтобы быть в курсе последних новостей, или к [чату](https://t.me/+qYFPI2mExuQxZTFi), чтобы пообщаться, задать вопрос и просто хорошо провести время.
+## How the website works
 
-Этот репозиторий содержит платформу для сайта «[Дока](https://doka.guide/)». Платформа собирает статьи из [отдельного репозитория](https://github.com/doka-guide/content).
+The "Doka" website is built on [Eleventy](https://www.11ty.dev). Using Nunjucks templates, Eleventy converts Markdown articles into HTML pages.
 
-## Как устроен сайт
+The project is built using GitHub Actions and hosted on a server, read more about deployment in the [deployment guide](./docs/deploy.md).
 
-Сайт «Доки» работает на базе [Eleventy](https://www.11ty.dev). При помощи Nunjucks-темплейтов Eleventy превращает статьи в формате Markdown в HTML-страницы.
+## How to work with it
 
-Проект собирается с помощью GitHub Actions и хостится на сервере, читайте [подробнее про деплой](./docs/deploy.md).
+To work with the platform, you will need [Node.js](https://nodejs.org/en/) and npm.
 
-## Как работать
+To run Doka locally, you need to:
 
-Для работы с платформой вам потребуется [Node.js](https://nodejs.org/en/) и npm.
+1. Download the repository.
+2. Make a copy of the `.env.example` file and name it `.env`. Set the necessary environment variables in it.
+3. Install dependencies with the command `npm i`.
+4. Start the local web server with the command `npm start`.
 
-Чтобы запустить Доку локально, нужно:
-
-1. Скачать репозиторий.
-1. Сделать копию файла `.env.example` и назвать его `.env`. Задать в нём нужные переменные окружения.
-1. Установить зависимости командой `npm i`.
-1. Запустить локальный веб-сервер командой `npm start`.
-
-Больше вариантов локального запуска Доки — [в руководстве по запуску](docs/how-to-run.md).
+More options for running Doka locally can be found in the [running guide](docs/how-to-run.md).
 
 ---
 
-Код распространяется [по лицензии MIT](LICENSE.md), шрифты имеют собственные лицензии, подробнее читайте [в документации](docs/license.md).
+The code is distributed under the [MIT license](LICENSE.md), fonts have their own licenses, read more in the [documentation](docs/license.md).
 
-## Как запускать тесты
+## How to run tests
 
-Мы используем [Jest](https://jestjs.io/docs/getting-started).
-Добавьте свои тесты. Для этого добавьте файлы тестов в папку `__tests__`. Файл с тестом лучше называть также, как файл, который тестируется.
+We use [Jest](https://jestjs.io/docs/getting-started).
+Add your tests by adding test files to the `__tests__` folder. It's best to name the test file the same as the file being tested.
 
-Запустите тесты командой `npm test`.
-Чтобы запустить тесты в `watch` режиме, используйте дополнительный флаг `--watch`: `npm test -- --watch`.
+Run the tests with the command `npm test`.
+To run tests in `watch` mode, use the additional `--watch` flag: `npm test -- --watch`.
 
-## Как дебажить?
+## How to debug
 
-Запустите команду `npm run debug` и откройте в Chrome кладку `chrome:://inspect`.
+Run the command `npm run debug` and open the `chrome:://inspect` tab in Chrome.
 
-Найдите нужную сессию в списке. Нажимайте `inspect` и запускайте отладку.
+Find the desired session in the list. Click `inspect` and start debugging.
 
-По-умолчанию отладчик сразу остановится. Чтобы добавить больше точек остановки добавьте в ваш код `debugger;` или найдите нужный файл и поставьте точку прямо в интерфейсе отладчика.
+By default, the debugger will stop immediately. To add more breakpoints, add `debugger;` to your code or find the desired file and set a breakpoint directly in the debugger interface.
+
